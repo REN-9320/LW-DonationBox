@@ -44,6 +44,7 @@
   const videoEl = document.getElementById('thankVideo');
   const playBtn = document.getElementById('playButton');
 
+  // セキュリティ上、音声付きで動画を自動で流すのはブラウザ側が初回だけ禁止している
   // 初回ユーザー操作で再生→即停止で音声付き自動再生許可
   playBtn.addEventListener('click', () => {
     videoEl.muted = false;
@@ -55,13 +56,14 @@
       console.error('初回再生失敗:', err);
     });
   });
-
+  // 再生が終われば元の状態に戻る
   videoEl.addEventListener('ended', () => {
     videoEl.style.display = 'none';
     imgEl.style.display   = 'block';
     videoEl.currentTime = 0;
   });
-
+  //viewを通してAPIを呼ぶ
+  // もし返ってきたリストに1が含まれていれば動画再生
   function callAPI() {
     fetch("http://127.0.0.1:8000/api")
       .then(response => response.json())
