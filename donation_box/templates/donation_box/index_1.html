@@ -1,0 +1,92 @@
+{% load static %}
+<style>
+  #thankVideo {
+    display: none;
+  }
+
+  .media {
+    margin-left: 50%;
+    margin-top: 50vh;
+    transform: translateX(-50%) translateY(-50%);
+  }
+
+  .video_wrapper {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .video-wrapper > video {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-50%);
+    min-width: 100%;
+    min-height: 100%;
+  }
+</style>
+
+<img id="qrImage" class="media" src="{% static 'img/QR_sample.jpg' %}" alt="QRコード">
+<div class="video-wrapper">
+    <video
+    id="thankVideo"
+    src="{% static 'video/donation_thanks_video.mp4' %}"
+    preload="auto"
+    playsinline
+    muted
+    ></video>
+</div>
+<button id="playButton">動画を有効化</button>
+
+<script>
+  const imgEl = document.getElementById('qrImage');
+  const videoEl = document.getElementById('thankVideo');
+  const playBtn = document.getElementById('playButton');
+
+  // 初回ユーザー操作で再生→即停止で音声付き自動再生許可
+  playBtn.addEventListener('click', () => {
+    videoEl.muted = false;
+    videoEl.play().then(() => {
+      videoEl.pause();
+      videoEl.currentTime = 0;
+      playBtn.style.display = 'none';
+    }).catch(err => {
+      console.error('初回再生失敗:', err);
+    });
+  });
+
+  videoEl.addEventListener('ended', () => {
+    videoEl.style.display = 'none';
+    imgEl.style.display   = 'block';
+    videoEl.currentTime = 0;
+  });
+
+  function callAPI() {
+    fetch("http://127.0.0.1:8000/api")
+      .then(response => response.json())
+      .then(data => {
+        console.log(data);
+        if (data.includes('1')) {
+          imgEl.style.display   = 'none';
+          videoEl.style.display = 'block';
+          videoEl.play().catch(err => {
+            console.error('動画再生エラー:', err);
+          });
+        }
+      })
+      .catch(error => {
+        console.error("API呼び出しエラー:", error);
+      });
+  }
+
+  // ポーリングはボタンが押された後に開始
+  let pollingStarted = false;
+  playBtn.addEventListener('click', () => {
+    if (!pollingStarted) {
+      callAPI();
+      setInterval(callAPI, 2000);
+      pollingStarted = true;
+    }
+  });
+</script>
