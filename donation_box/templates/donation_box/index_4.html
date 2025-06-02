@@ -65,6 +65,7 @@
   const apiUrl = `${window.location.origin}/api`;
 
   function callAPI() {
+    const apiUrl = `${window.location.origin}/api`;
     fetch(apiUrl)
       .then(response => response.json())
       .then(data => {

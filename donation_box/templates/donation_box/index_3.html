@@ -63,7 +63,8 @@
   });
 
   function callAPI() {
-    fetch("http://127.0.0.1:8000/api")
+    const apiUrl = `${window.location.origin}/api`;
+    fetch(apiUrl)
       .then(response => response.json())
       .then(data => {
         console.log(data);
