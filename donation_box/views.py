@@ -1,8 +1,12 @@
 from django.shortcuts import render
 import requests
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
+
 
 # Create your views here.
+def home(request):
+    return HttpResponse("Hello, this is the home page.")
+
 def index_1(request):
     return render(request, "donation_box/index_1.html")
 
