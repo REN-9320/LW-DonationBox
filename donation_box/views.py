@@ -33,13 +33,14 @@ def data_api(request):
     payload = {'prev_datetime': prev_datetime}
     
     response = requests.post(url, headers=headers, json=payload)
-    
     raw_data = response.json()
+    print(raw_data)
     response_data = []
     if raw_data["status"] == "1":
         prev_datetime = raw_data["datetime"]
+        mode = raw_data["mode"]
         donation_boxes = raw_data["donation_boxes"]
         if donation_boxes:
             for box in donation_boxes:
                 response_data.append(box["d"])
-        return JsonResponse(response_data, safe=False)
+        return JsonResponse({"response_data":response_data, "mode": mode})

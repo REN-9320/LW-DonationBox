@@ -71,7 +71,7 @@
       .then(response => response.json())
       .then(data => {
         console.log(data);
-        if (data.includes('1')) {
+        if (data.response_data.includes('1')) {
           imgEl.style.display   = 'none';
           videoEl.style.display = 'block';
           videoEl.play().catch(err => {

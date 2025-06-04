@@ -69,7 +69,7 @@
       .then(response => response.json())
       .then(data => {
         console.log(data);
-        if (data.includes('3')) {
+        if (data.response_data.includes('3')) {
           imgEl.style.display   = 'none';
           videoEl.style.display = 'block';
           videoEl.play().catch(err => {
