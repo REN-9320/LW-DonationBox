@@ -45,52 +45,64 @@
   const videoEl = document.getElementById('thankVideo');
   const playBtn = document.getElementById('playButton');
 
-  // 初回ユーザー操作で再生→即停止で音声付き自動再生許可
+  let pollingStarted = false;
+  let pollingInterval = null;
+  let isPaused = false;
+  let previousData = false;
+
+  // セキュリティ対応：一度ユーザー操作で再生→即停止で音声付き再生を許可
   playBtn.addEventListener('click', () => {
     videoEl.muted = false;
     videoEl.play().then(() => {
       videoEl.pause();
       videoEl.currentTime = 0;
       playBtn.style.display = 'none';
+
+      // ポーリング開始
+      if (!pollingStarted) {
+        pollingInterval = setInterval(callAPI, 2000);
+        pollingStarted = true;
+      }
     }).catch(err => {
       console.error('初回再生失敗:', err);
     });
   });
 
+  // 再生が終わったら画像表示＆ポーリング再開
   videoEl.addEventListener('ended', () => {
     videoEl.style.display = 'none';
-    imgEl.style.display   = 'block';
+    imgEl.style.display = 'block';
     videoEl.currentTime = 0;
+
+    isPaused = false; // ポーリング再開
   });
 
-  const apiUrl = `${window.location.origin}/api`;
-
   function callAPI() {
+    if (isPaused) return;
+
     const apiUrl = `${window.location.origin}/api`;
     fetch(apiUrl)
       .then(response => response.json())
       .then(data => {
         console.log(data);
         if (data.response_data.includes('4')) {
-          imgEl.style.display   = 'none';
+          // ポーリング一時停止
+          if (previousData) return;
+          isPaused = true;
+          previousData = true;
+          // 動画再生
+          imgEl.style.display = 'none';
           videoEl.style.display = 'block';
           videoEl.play().catch(err => {
             console.error('動画再生エラー:', err);
+            isPaused = false; // 再生失敗時はポーリング再開
           });
+        } else {
+          previousData = false;
         }
       })
       .catch(error => {
         console.error("API呼び出しエラー:", error);
       });
   }
-
-  // ポーリングはボタンが押された後に開始
-  let pollingStarted = false;
-  playBtn.addEventListener('click', () => {
-    if (!pollingStarted) {
-      callAPI();
-      setInterval(callAPI, 2000);
-      pollingStarted = true;
-    }
-  });
 </script>

@@ -30,6 +30,7 @@ def data_api(request):
     'Content-Type': 'application/json',
     'X-API-KEY': "56SD7Ozka82xBbOlrwoGN80RL1Azg2iP60WKyw5n"
     }   
+    
     payload = {'prev_datetime': prev_datetime}
     
     response = requests.post(url, headers=headers, json=payload)
