@@ -48,6 +48,7 @@
   let pollingStarted = false;
   let pollingInterval = null;
   let isPaused = false;
+  let previousResponse = false;
 
   // セキュリティ対応：一度ユーザー操作で再生→即停止で音声付き再生を許可
   playBtn.addEventListener('click', () => {
@@ -80,7 +81,7 @@
 
   function callAPI() {
     if (isPaused) return;
-
+    if (previousResponse) return;
     const apiUrl = `${window.location.origin}/api/`;
     fetch(apiUrl, {
       method: "POST",
@@ -92,6 +93,7 @@
       console.log(data)
       const values = data.response_data;
       if (data.response_data.includes('1')) {
+        previousResponse = true;
         isPaused = true;
         prevDatetime = data.datetime; // サーバーからの datetime を保存
         imgEl.style.display = 'none';
@@ -100,6 +102,8 @@
           console.error('動画再生エラー:', err);
           isPaused = false;
         });
+      } else {
+        previousResponse = false;
       }
     })
     .catch(error => {
