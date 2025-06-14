@@ -48,7 +48,6 @@
   let pollingStarted = false;
   let pollingInterval = null;
   let isPaused = false;
-  let previousData = false;
 
   // セキュリティ対応：一度ユーザー操作で再生→即停止で音声付き再生を許可
   playBtn.addEventListener('click', () => {
@@ -77,32 +76,34 @@
     isPaused = false; // ポーリング再開
   });
 
+  let prevDatetime = '0000000000';
+
   function callAPI() {
     if (isPaused) return;
 
-    const apiUrl = `${window.location.origin}/api`;
-    fetch(apiUrl)
-      .then(response => response.json())
-      .then(data => {
-        console.log(data);
-        if (data.response_data.includes('1')) {
-          // ポーリング一時停止
-          if (previousData) return;
-          isPaused = true;
-          previousData = true;
-          // 動画再生
-          imgEl.style.display = 'none';
-          videoEl.style.display = 'block';
-          videoEl.play().catch(err => {
-            console.error('動画再生エラー:', err);
-            isPaused = false; // 再生失敗時はポーリング再開
-          });
-        } else {
-          previousData = false;
-        }
-      })
-      .catch(error => {
-        console.error("API呼び出しエラー:", error);
-      });
+    const apiUrl = `${window.location.origin}/api/`;
+    fetch(apiUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prev_datetime: prevDatetime })
+    })
+    .then(response => response.json())
+    .then(data => {
+      console.log(data)
+      const values = data.response_data;
+      if (data.response_data.includes('1')) {
+        isPaused = true;
+        prevDatetime = data.datetime; // サーバーからの datetime を保存
+        imgEl.style.display = 'none';
+        videoEl.style.display = 'block';
+        videoEl.play().catch(err => {
+          console.error('動画再生エラー:', err);
+          isPaused = false;
+        });
+      }
+    })
+    .catch(error => {
+      console.error("API呼び出しエラー:", error);
+    });
   }
 </script>
