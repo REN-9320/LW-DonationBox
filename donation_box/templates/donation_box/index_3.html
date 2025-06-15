@@ -81,7 +81,6 @@
 
   function callAPI() {
     if (isPaused) return;
-    if (previousResponse) return;
     const apiUrl = `${window.location.origin}/api/`;
     fetch(apiUrl, {
       method: "POST",
@@ -92,10 +91,15 @@
     .then(data => {
       console.log(data)
       const values = data.response_data;
-      if (data.response_data.includes('1')) {
-        previousResponse = true;
+      if (data.response_data.includes('3')) {
+        if (previousResponse) {
+          previousResponse = false;
+          return;
+        } 
         isPaused = true;
-        prevDatetime = data.datetime; // サーバーからの datetime を保存
+        prevDatetime = data.datetime;
+        console.log(previousResponse)
+        previousResponse = true; // サーバーからの datetime を保存
         imgEl.style.display = 'none';
         videoEl.style.display = 'block';
         videoEl.play().catch(err => {
